@@ -1,26 +1,23 @@
-async function loadProducts() {
-  const res = await fetch('products.json');
-  const products = await res.json();
+// src/products.js
+const products = [
+  {
+    id: 1,
+    name: "Laptop",
+    price: 60000,
+    description: "Powerful laptop for work and gaming",
+  },
+  {
+    id: 2,
+    name: "Smartphone",
+    price: 25000,
+    description: "Latest smartphone with great features",
+  },
+  {
+    id: 3,
+    name: "Headphones",
+    price: 2000,
+    description: "Noise-cancelling headphones",
+  },
+];
 
-  const container = document.getElementById('product-list');
-  products.forEach(p => {
-    const div = document.createElement('div');
-    div.className = 'product';
-    div.innerHTML = `
-      <img src="${p.image}" width="100">
-      <h3>${p.name}</h3>
-      <p>₹${p.price}</p>
-      <button onclick="addToCart(${p.id})">Add to Cart</button>
-    `;
-    container.appendChild(div);
-  });
-}
-
-function addToCart(id) {
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  cart.push(id);
-  localStorage.setItem('cart', JSON.stringify(cart));
-  alert("Added to cart!");
-}
-
-loadProducts();
+export default products;
