@@ -127,9 +127,26 @@
     function closeSizeGuide(){el("#sizeModal").classList.remove("open")}
     function openDeliveryModal(){el("#deliveryModal").classList.add("open")}
     function closeDeliveryModal(){el("#deliveryModal").classList.remove("open")}
-    async function fetchProducts(){const grid=el("#grid");if(!GOOGLE_SHEET_URL||GOOGLE_SHEET_URL.includes("PASTE_YOUR")){return void(grid.innerHTML='<p style="color:red; font-weight:bold;">CONFIGURATION ERROR: The Google Sheet URL is missing. Please paste the link into the script.</p>');}
-    grid.innerHTML="<p>Loading products...</p>";try{const response=await fetch(GOOGLE_SHEET_URL);if(!response.ok)throw new Error(`Network response was not ok: ${response.statusText}`);const csvText=await response.text(),rows=csvText.split("\n").slice(1);allProducts=rows.map(row=>{const cols=row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(c=>c.replace(/"/g,""));if(cols.length<6)return null;return{id:cols[0],name:cols[1],price:parseInt(cols[2]),img:cols[3],sizes:cols[4]?cols[4].split(","):[],inStock:"TRUE"===cols[5]}}).filter(p=>p&&p.id)}catch(error){console.error("Error fetching products:",error);grid.innerHTML="<p>Could not load products. Please check the Google Sheet link and try again later.</p>"}}
-    async function initializeApp(){"loading"===document.readyState?document.addEventListener("DOMContentLoaded",initializeApp):("complete"===document.readyState||"interactive"===document.readyState?(await fetchProducts(),buildTicker(),renderCart(),updateBadge(),document.title.includes("Home")&&allProducts.length>0&&renderGrid(allProducts.slice(0,4)),function(){const attachListener=(s,e,h)=>{const el=document.querySelector(s);el&&(el[e]=h)};attachListener("#openCart","onclick",openCart);attachListener("#closeCart","onclick",closeCart);attachListener("#xBtn","onclick",closeCart);attachListener("#clearBtn","onclick",clearCart);attachListener("#waCheckout","onclick",openDeliveryModal);attachListener("#confirmCheckout","onclick",handleFinalCheckout);attachListener("#whatsBtn","onclick",openWhatsAppChat);attachListener("#sizeBg","onclick",closeSizeGuide);attachListener("#closeSize","onclick",closeSizeGuide);attachListener("#deliveryBg","onclick",closeDeliveryModal);attachListener("#closeDelivery","onclick",closeDeliveryModal);attachListener("#toastViewCart","onclick",()=>{openCart();el("#toast").classList.remove("show")});document.querySelectorAll(".open-size-guide").forEach(b=>b.onclick=openSizeGuide)}()):document.addEventListener("DOMContentLoaded",initializeApp))}
+    async function fetchProducts(){const grid=el("#grid");if(!GOOGLE_SHEET_URL||GOOGLE_SHEET_URL.includes("PASTE_YOUR")){return void(grid&&(grid.innerHTML='<p style="color:red; font-weight:bold;">CONFIGURATION ERROR: The Google Sheet URL is missing. Please paste the link into the script.</p>'))}
+    grid&& (grid.innerHTML="<p>Loading products...</p>");try{const response=await fetch(GOOGLE_SHEET_URL);if(!response.ok)throw new Error(`Network response was not ok: ${response.statusText}`);const csvText=await response.text(),rows=csvText.split("\n").slice(1);allProducts=rows.map(row=>{const cols=row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(c=>c.replace(/"/g,""));if(cols.length<6)return null;return{id:cols[0],name:cols[1],price:parseInt(cols[2]),img:cols[3],sizes:cols[4]?cols[4].split(","):[],inStock:"TRUE"===cols[5]}}).filter(p=>p&&p.id)}catch(error){console.error("Error fetching products:",error);grid&&(grid.innerHTML="<p>Could not load products. Please check the Google Sheet link and try again later.</p>")}}
+    
+    function applyFilters() {
+        const searchTerm = el('#search-input').value.toLowerCase();
+        const sizeFilter = el('#size-filter').value;
+        const priceFilter = el('#price-filter').value;
+        let filteredProducts = allProducts.filter(p => {
+            const nameMatch = p.name.toLowerCase().includes(searchTerm);
+            const sizeMatch = (sizeFilter === 'all') || p.sizes.includes(sizeFilter);
+            let priceMatch = true;
+            if (priceFilter !== 'all') { const [min, max] = priceFilter.split('-').map(Number); priceMatch = p.price >= min && p.price <= max; }
+            return nameMatch && sizeMatch && priceMatch;
+        });
+        renderGrid(filteredProducts);
+        el('#no-results').style.display = filteredProducts.length === 0 ? 'block' : 'none';
+    }
+
+    async function initializeApp(){if("loading"===document.readyState)return void document.addEventListener("DOMContentLoaded",initializeApp);await fetchProducts();buildTicker();renderCart();updateBadge();const attachListener=(s,e,h)=>{const el=document.querySelector(s);el&&(el[e]=h)};if(document.title.includes("Home")&&allProducts.length>0){renderGrid(allProducts.slice(0,4))}if(document.title.includes("Shop")){renderGrid(allProducts);attachListener("#search-input","oninput",applyFilters);attachListener("#size-filter","onchange",applyFilters);attachListener("#price-filter","onchange",applyFilters);attachListener("#reset-filters","onclick",()=>{el("#search-input").value="";el("#size-filter").value="all";el("#price-filter").value="all";applyFilters()})}
+    attachListener("#openCart","onclick",openCart);attachListener("#closeCart","onclick",closeCart);attachListener("#xBtn","onclick",closeCart);attachListener("#clearBtn","onclick",clearCart);attachListener("#waCheckout","onclick",openDeliveryModal);attachListener("#confirmCheckout","onclick",handleFinalCheckout);attachListener("#whatsBtn","onclick",openWhatsAppChat);attachListener("#sizeBg","onclick",closeSizeGuide);attachListener("#closeSize","onclick",closeSizeGuide);attachListener("#deliveryBg","onclick",closeDeliveryModal);attachListener("#closeDelivery","onclick",closeDeliveryModal);attachListener("#toastViewCart","onclick",()=>{openCart();el("#toast").classList.remove("show")});document.querySelectorAll(".open-size-guide").forEach(b=>b.onclick=openSizeGuide)}
     initializeApp();
   </script>
 </body>
