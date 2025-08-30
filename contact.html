@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact Us — Aruna Textiles & Nighties</title>
+  <meta name="description" content="Get in touch with us via WhatsApp or visit our store in Suryapet."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #fffbfd; --card: #ffffff; --text: #4a2342; --muted: #91778e; --brand: #c2185b; --accent: #fbc02d; --rose: #fce4ec; --shadow: 0 10px 30px rgba(0,0,0,.08); --radius: 20px; }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;}
+    a{color:inherit;text-decoration:none}
+    .announce{position:sticky;top:0;z-index:50;background:linear-gradient(90deg,var(--brand),var(--accent));color:#fff}
+    .announce-inner{display:flex;gap:32px;white-space:nowrap;overflow:hidden;padding:8px 0;font-weight:600;letter-spacing:.2px}
+    .ticker{display:inline-flex;gap:40px;animation:scroll 24s linear infinite}
+    @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    header{position:sticky;top:36px;z-index:40;backdrop-filter:saturate(140%) blur(6px);}
+    .nav{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-radius:16px}
+    .nav-links { display: flex; align-items: center; gap: 24px; font-weight: 600; }
+    .nav-links a.active { color: var(--brand); text-decoration: underline; }
+    .brand{font-family:"Playfair Display",serif;font-weight:700;font-size:26px;letter-spacing:.2px}
+    .tag{font-size:12px;color:var(--muted)}
+    .actions{display:flex;align-items:center;gap:12px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fff;box-shadow:var(--shadow);cursor:pointer;font-weight:600; transition: transform 0.2s ease;}
+    .btn:hover { transform: translateY(-2px); }
+    .btn.primary{background:var(--brand);color:#fff;border-color:transparent}
+    .cart-count{background:#000;color:#fff;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;transition:transform .2s ease-out}
+    .link{border:none;background:transparent;text-decoration:underline;cursor:pointer;color:var(--brand);font-weight:700}
+    .cart-bounce{animation:cart-bounce .6s ease}
+    @keyframes cart-bounce{0%,100%{transform:translateY(0)} 40%{transform:translateY(-8px)} 60%{transform:translateY(-4px)}}
+    .section{max-width:1180px;margin:26px auto;padding:0 20px}
+    .section h1{font-family:"Playfair Display",serif;font-size:40px;margin:6px 0 14px; text-align: center;}
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center;}
+    .contact-details { background: var(--card); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); }
+    .contact-details h3 { font-family:"Playfair Display",serif; margin-top: 0; }
+    .contact-details p { line-height: 1.7; }
+    .map-container { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); aspect-ratio: 4/3; }
+    .map-container iframe { width: 100%; height: 100%; border: 0; }
+    .dot{opacity:.75}
+    .drawer{position:fixed;inset:0;display:none;z-index: 60;} .drawer.open{display:block} .scrim{position:absolute;inset:0;background:rgba(0,0,0,.36)} .panel{position:absolute;right:0;top:0;bottom:0;width:460px;max-width:100%;background:#fff;border-top-left-radius:16px;border-bottom-left-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column} .panel header{position:sticky;top:0;backdrop-filter:none} .panel .head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #eee} .items{flex:1;overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px} .item{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;border:1px solid #eee;border-radius:12px;padding:8px} .item img{width:64px;height:64px;object-fit:cover;border-radius:10px} .qty{display:flex;gap:6px;align-items:center} .qty button{width:28px;height:28px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-weight:800} .foot{border-top:1px solid #eee;padding:12px 16px;display:grid;gap:8px} .totals{display:grid;grid-template-columns:1fr auto;gap:8px;font-weight:700} .cta{display:flex;gap:8px} .cta .btn{flex:1;justify-content:center;padding:14px 16px;border-radius:14px}
+    footer{max-width:1180px;margin:40px auto 60px;padding:0 20px;color:var(--muted); border-top: 1px solid #eee; padding-top: 20px;}
+    footer .cols{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:20px}
+    .modal{position:fixed;inset:0;display:none} .modal.open{display:block;z-index:100} .modal .bg{position:absolute;inset:0;background:rgba(0,0,0,.45)} .modal .box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:18px;box-shadow:var(--shadow);width:min(680px,92vw);max-height:86vh;overflow:auto;display:flex;flex-direction:column} .box header{padding:16px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center} .box .content{padding:16px 18px} .box footer{max-width:100%;padding:10px 18px;margin:0;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:10px} table{width:100%;border-collapse:collapse} th,td{border:1px solid #eee;padding:10px;text-align:center} th{background:#faf7f4} .form-group{margin-bottom:14px} .form-group label{display:block;font-size:13px;font-weight:700;margin-bottom:6px} .form-group input, .form-group textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;background:#faf7f4} .form-group textarea{resize:vertical;min-height:80px}
+    .toast{position:fixed;bottom:20px;right:20px;z-index:110;background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:12px 16px;display:flex;align-items:center;gap:12px;transform:translateY(150%);opacity:0;transition:transform .4s ease, opacity .4s ease} .toast.show{transform:translateY(0);opacity:1} .toast .btn{padding:8px 12px;border-radius:10px;background:var(--accent);color:#fff;border:none}
+    .small{font-size:12px;color:var(--muted)}
+    @media (max-width:1024px){ header{top:34px} .nav-links { display: none; } }
+    @media (max-width:720px){ .contact-grid { grid-template-columns: 1fr; } .nav{padding:10px 16px} .brand{font-size:22px} }
+  </style>
+</head>
+<body>
+  <div class="announce" aria-label="Latest offers"><div class="announce-inner"><div class="ticker" id="tickerA"></div><div class="ticker" id="tickerB" aria-hidden="true"></div></div></div>
+  <header>
+    <nav class="nav">
+      <a href="./index.html">
+        <div class="brand">Aruna Textiles & Nighties</div>
+        <div class="tag">Cozy • Classy • Comfortable</div>
+      </a>
+      <div class="nav-links">
+        <a href="./index.html">Home</a>
+        <a href="./shop.html">Shop</a>
+        <a href="./about.html">About Us</a>
+        <a href="./contact.html" class="active">Contact</a>
+      </div>
+      <div class="actions">
+        <button class="btn" id="whatsBtn" title="Chat on WhatsApp">WhatsApp</button>
+        <button class="btn primary" id="openCart" aria-label="Open cart">Cart <span class="cart-count" id="cartCount">0</span></button>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <section
+
