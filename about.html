@@ -15,7 +15,12 @@
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;}
     a{color:inherit;text-decoration:none}
-    header{position:sticky;top:0;z-index:40;background:var(--bg); backdrop-filter: saturate(140%) blur(6px);}
+    .announce{position:sticky;top:0;z-index:50;background:linear-gradient(90deg,var(--brand),var(--accent));color:#fff}
+    .announce-inner{display:flex;gap:32px;white-space:nowrap;overflow:hidden;padding:8px 0;font-weight:600;letter-spacing:.2px}
+    .ticker{display:inline-flex;gap:40px;animation:scroll 24s linear infinite}
+    .dot{opacity:.75}
+    @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    header{position:sticky;top:36px;z-index:40;backdrop-filter:saturate(140%) blur(6px);}
     .nav{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-radius:16px}
     .nav-links { display: flex; align-items: center; gap: 24px; font-weight: 600; }
     .nav-links a.active { color: var(--brand); text-decoration: underline; }
@@ -36,6 +41,7 @@
   </style>
 </head>
 <body>
+  <div class="announce" aria-label="Latest offers"><div class="announce-inner"><div class="ticker" id="tickerA"></div><div class="ticker" id="tickerB" aria-hidden="true"></div></div></div>
   <header>
     <nav class="nav">
       <a href="./index.html"><div class="brand">Aruna Textiles & Nighties</div><div class="tag">Cozy • Classy • Comfortable</div></a>
@@ -63,47 +69,35 @@
   
   <script>
     const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQv8qPQCMfOTmke6Bzt2TlKpiGZLcFZm--VSnfSeot_YajC325p1UYkRmIp2lqF1A9Cb0uue9kPGtCP/pub?gid=0&single=true&output=csv';
-    
-    const BRAND = "Aruna Textiles & Nighties"; const WHATSAPP_NUMBER = "918125210950";
+    const BRAND = "Aruna Textiles & Nighties"; const WHATSAPP_NUMBER = "918125210950"; const OFFERS = ["Free Shipping on Orders Over ₹1500", "Festive Collection — 20% Off", "New: Maternity & Plus Sizes", "Easy Returns & Exchanges"];
     const toINR = n => new Intl.NumberFormat('en-IN', {style:'currency',currency:'INR',maximumFractionDigits:0}).format(n); const el = sel => document.querySelector(sel); const make = (tag, props={}) => Object.assign(document.createElement(tag), props);
-    let cart=JSON.parse(localStorage.getItem("arunaCart")||"[]");
-
-    function updateBadge(){const cartCountEl = el("#cartCount"); if(cartCountEl) cartCountEl.textContent=cart.reduce((a,b)=>a+b.qty,0)}
+    let allProducts = []; let cart=JSON.parse(localStorage.getItem("arunaCart")||"[]");
+    
+    function buildTicker(){const tickerA=el("#tickerA"),tickerB=el("#tickerB");if(tickerA&&tickerB){const n=OFFERS.map(o=>`<span>${o}</span><span class="dot">•</span>`).join("");tickerA.innerHTML=n+n;tickerB.innerHTML=n+n}}
+    function renderGrid(productsToShow){const wrap=el("#grid");if(!wrap)return;wrap.innerHTML="";productsToShow.forEach(p=>{const card=make("div",{className:"card"}),cover=make("div",{className:"cover"});cover.appendChild(make("img",{src:p.img,alt:p.name}));const title=make("div",{className:"title",textContent:p.name}),price=make("div",{className:"price",textContent:toINR(p.price)}),sizeRow=make("div",{className:"size"});let selSize=p.sizes[0];p.sizes.forEach(s=>{const b=make("button",{textContent:s});s===selSize&&b.classList.add("active");b.onclick=()=>{selSize=s;[...sizeRow.children].forEach(x=>x.classList.remove("active"));b.classList.add("active")};sizeRow.appendChild(b)});const addBtn=make("button",{className:"btn add",textContent:"Add to Cart"});addBtn.onclick=()=>addToCart(p,selSize);if(!p.inStock){const soldOutOverlay=make("div",{className:"sold-out",textContent:"Sold Out"});cover.append(soldOutOverlay);addBtn.disabled=!0;addBtn.textContent="Out of Stock";[...sizeRow.children].forEach(b=>b.disabled=!0)}const row=make("div",{className:"row"});row.append(price,make("div"));card.append(cover,title,row,sizeRow,addBtn);wrap.appendChild(card)})}
+    let toastTimeout;function showToast(){clearTimeout(toastTimeout);const t=el("#toast");t&&t.classList.add("show");toastTimeout=setTimeout(()=>{t&&t.classList.remove("show")},3e3)}
     function persist(){localStorage.setItem("arunaCart",JSON.stringify(cart));updateBadge()}
-    function renderCart(){const l=el("#items");if(!l)return;l.innerHTML="";const waCheckoutBtn=el("#waCheckout");if(0===cart.length){l.appendChild(make("div",{className:"muted",textContent:"Your cart is empty."}));if(waCheckoutBtn)waCheckoutBtn.disabled=!0}else{if(waCheckoutBtn)waCheckoutBtn.disabled=!1;cart.forEach((i,x)=>{const r=make("div",{className:"item"});r.appendChild(make("img",{src:i.img,alt:i.name}));const m=make("div");m.appendChild(make("div",{style:"font-weight:700",textContent:i.name}));m.appendChild(make("div",{className:"small",textContent:`Size: ${i.size}`}));m.appendChild(make("div",{className:"small",textContent:toINR(i.price)}));r.appendChild(m);const q=make("div",{className:"qty"}),a=make("button",{textContent:"−"});a.onclick=()=>changeQty(x,-1);const n=make("div",{textContent:i.qty}),c=make("button",{textContent:"+"});c.onclick=()=>changeQty(x,1);const d=make("button",{textContent:"×"});d.onclick=()=>removeItem(x);q.append(a,n,c,d);r.appendChild(q);l.appendChild(r)})};const subtotalEl=el("#subtotal"),totalEl=el("#total");if(subtotalEl)subtotalEl.textContent=toINR(calcTotal());if(totalEl)totalEl.textContent=toINR(calcTotal())}
+    function updateBadge(){const cartCountEl=el("#cartCount");cartCountEl&&(cartCountEl.textContent=cart.reduce((a,b)=>a+b.qty,0))}
+    function addToCart(p,s){const e=cart.find(i=>i.id===p.id&&i.size===s);e?e.qty+=1:cart.push({id:p.id,name:p.name,price:p.price,size:s,qty:1,img:p.img});persist();showToast();const b=el("#openCart");b&&b.classList.add("cart-bounce");b&&b.addEventListener("animationend",()=>b.classList.remove("cart-bounce"),{once:!0});renderCart()}
+    function renderCart(){const l=el("#items");if(!l)return;l.innerHTML="";const waCheckoutBtn=el("#waCheckout");if(0===cart.length){l.appendChild(make("div",{className:"muted",textContent:"Your cart is empty."}));waCheckoutBtn&&(waCheckoutBtn.disabled=!0)}else{waCheckoutBtn&&(waCheckoutBtn.disabled=!1);cart.forEach((i,x)=>{const r=make("div",{className:"item"});r.appendChild(make("img",{src:i.img,alt:i.name}));const m=make("div");m.appendChild(make("div",{style:"font-weight:700",textContent:i.name}));m.appendChild(make("div",{className:"small",textContent:`Size: ${i.size}`}));m.appendChild(make("div",{className:"small",textContent:toINR(i.price)}));r.appendChild(m);const q=make("div",{className:"qty"}),a=make("button",{textContent:"−"});a.onclick=()=>changeQty(x,-1);const n=make("div",{textContent:i.qty}),c=make("button",{textContent:"+"});c.onclick=()=>changeQty(x,1);const d=make("button",{textContent:"×"});d.onclick=()=>removeItem(x);q.append(a,n,c,d);r.appendChild(q);l.appendChild(r)})};const subtotalEl=el("#subtotal"),totalEl=el("#total");subtotalEl&&(subtotalEl.textContent=toINR(calcTotal()));totalEl&&(totalEl.textContent=toINR(calcTotal()))}
     function removeItem(i){cart.splice(i,1);persist();renderCart()}
     function changeQty(i,d){cart[i].qty=Math.max(1,cart[i].qty+d);persist();renderCart()}
     function clearCart(){cart=[];persist();renderCart()}
     function calcTotal(){return cart.reduce((s,i)=>s+i.price*i.qty,0)}
-    function openCart(){const drawer=el("#drawer");if(drawer)drawer.classList.add("open")}
-    function closeCart(){const drawer=el("#drawer");if(drawer)drawer.classList.remove("open")}
+    function openCart(){el("#drawer")&&el("#drawer").classList.add("open")}
+    function closeCart(){el("#drawer")&&el("#drawer").classList.remove("open")}
     function buildWhatsAppText(d,o){const l=[];l.push(`*New Order - ID: ${o}*`);l.push(`Hello ${BRAND}! I'd like to place an order:`);l.push("");cart.forEach(i=>{const n=`• ${i.name} (Size: ${i.size}) × ${i.qty} — ${toINR(i.price*i.qty)}`;l.push(n)});const t=calcTotal();l.push("");l.push(`Subtotal: ${toINR(t)}`);l.push("---");l.push("*Delivery Details:*");l.push(`Name: ${d.name}`);l.push(`Phone: ${d.phone}`);l.push(`Address: ${d.address}`);return l.join("\n")}
     function handleFinalCheckout(){const n=new Date,d=String(n.getDate()).padStart(2,"0"),m=String(n.getMonth()+1).padStart(2,"0"),y=String(n.getFullYear()).slice(-2),h=String(n.getHours()).padStart(2,"0"),min=String(n.getMinutes()).padStart(2,"0"),o=`ATN-${d}${m}${y}-${h}${min}`,a=el("#custName").value.trim(),p=el("#custPhone").value.trim(),s=el("#custAddress").value.trim();if(!a||!p||!s)return void alert("Please fill out all delivery details.");const c={name:a,phone:p,address:s},g=encodeURIComponent(buildWhatsAppText(c,o)),u=`https://wa.me/${WHATSAPP_NUMBER}?text=${g}`;window.open(u,"_blank");closeDeliveryModal()}
     function openWhatsAppChat(){const u=`https://wa.me/${WHATSAPP_NUMBER}`;window.open(u,"_blank")}
-    function openDeliveryModal(){const modal=el("#deliveryModal");if(modal)modal.classList.add("open")}
-    function closeDeliveryModal(){const modal=el("#deliveryModal");if(modal)modal.classList.remove("open")}
-
-    async function initializeApp() {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
-            return;
-        }
-        renderCart();
-        updateBadge();
-        const attachListener = (selector, event, handler) => {
-            const element = document.querySelector(selector);
-            if (element) {
-                element[event] = handler;
-            }
-        };
-        attachListener('#openCart', 'onclick', openCart);
-        attachListener('#closeCart', 'onclick', closeCart);
-        attachListener('#xBtn', 'onclick', closeCart);
-        attachListener('#clearBtn', 'onclick', clearCart);
-        attachListener('#waCheckout', 'onclick', openDeliveryModal);
-        attachListener('#confirmCheckout', 'onclick', handleFinalCheckout);
-        attachListener('#whatsBtn', 'onclick', openWhatsAppChat);
-    }
+    function openSizeGuide(){el("#sizeModal")&&el("#sizeModal").classList.add("open")}
+    function closeSizeGuide(){el("#sizeModal")&&el("#sizeModal").classList.remove("open")}
+    function openDeliveryModal(){el("#deliveryModal")&&el("#deliveryModal").classList.add("open")}
+    function closeDeliveryModal(){el("#deliveryModal")&&el("#deliveryModal").classList.remove("open")}
+    async function fetchProducts(){const grid=el("#grid");if(!GOOGLE_SHEET_URL||GOOGLE_SHEET_URL.includes("PASTE_YOUR")){return void(grid&&(grid.innerHTML='<p style="color:red; font-weight:bold;">CONFIGURATION ERROR: The Google Sheet URL is missing. Please paste the link into the script.</p>'))}
+    grid&& (grid.innerHTML="<p>Loading products...</p>");try{const response=await fetch(GOOGLE_SHEET_URL);if(!response.ok)throw new Error(`Network response was not ok: ${response.statusText}`);const csvText=await response.text(),rows=csvText.split("\n").slice(1);allProducts=rows.map(row=>{const cols=row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(c=>c.replace(/"/g,""));if(cols.length<6)return null;return{id:cols[0],name:cols[1],price:parseInt(cols[2]),img:cols[3],sizes:cols[4]?cols[4].split(","):[],inStock:"TRUE"===cols[5]}}).filter(p=>p&&p.id)}catch(error){console.error("Error fetching products:",error);grid&&(grid.innerHTML="<p>Could not load products. Please check the Google Sheet link and try again later.</p>")}}
+    function applyFilters(){const searchTerm=el("#search-input").value.toLowerCase(),sizeFilter=el("#size-filter").value,priceFilter=el("#price-filter").value;let filteredProducts=allProducts.filter(p=>{const nameMatch=p.name.toLowerCase().includes(searchTerm),sizeMatch="all"===sizeFilter||p.sizes.includes(sizeFilter);let priceMatch=!0;if("all"!==priceFilter){const[min,max]=priceFilter.split("-").map(Number);priceMatch=p.price>=min&&p.price<=max}return nameMatch&&sizeMatch&&priceMatch});renderGrid(filteredProducts);const noResultsEl=el("#no-results");noResultsEl&&(noResultsEl.style.display=0===filteredProducts.length?"block":"none")}
+    async function initializeApp(){if("loading"===document.readyState)return void document.addEventListener("DOMContentLoaded",initializeApp);await fetchProducts();buildTicker();renderCart();updateBadge();const attachListener=(s,e,h)=>{const el=document.querySelector(s);el&&(el[e]=h)};if(document.title.includes("Home")&&allProducts.length>0){renderGrid(allProducts.slice(0,4))}if(document.title.includes("Shop")){renderGrid(allProducts);attachListener("#search-input","oninput",applyFilters);attachListener("#size-filter","onchange",applyFilters);attachListener("#price-filter","onchange",applyFilters);attachListener("#reset-filters","onclick",()=>{el("#search-input").value="";el("#size-filter").value="all";el("#price-filter").value="all";applyFilters()})}
+    attachListener("#openCart","onclick",openCart);attachListener("#closeCart","onclick",closeCart);attachListener("#xBtn","onclick",closeCart);attachListener("#clearBtn","onclick",clearCart);attachListener("#waCheckout","onclick",openDeliveryModal);attachListener("#confirmCheckout","onclick",handleFinalCheckout);attachListener("#whatsBtn","onclick",openWhatsAppChat);attachListener("#sizeBg","onclick",closeSizeGuide);attachListener("#closeSize","onclick",closeSizeGuide);attachListener("#deliveryBg","onclick",closeDeliveryModal);attachListener("#closeDelivery","onclick",closeDeliveryModal);attachListener("#toastViewCart","onclick",()=>{openCart();el("#toast").classList.remove("show")});document.querySelectorAll(".open-size-guide").forEach(b=>b.onclick=openSizeGuide)}
     initializeApp();
   </script>
 </body>
