@@ -127,7 +127,7 @@
     function closeSizeGuide(){el("#sizeModal").classList.remove("open")}
     function openDeliveryModal(){el("#deliveryModal").classList.add("open")}
     function closeDeliveryModal(){el("#deliveryModal").classList.remove("open")}
-    async function fetchProducts(){const grid=el("#grid");if(!GOOGLE_SHEET_URL||GOOGLE_SHEET_URL.includes("PASTE_YOUR")){return void(grid&&(grid.innerHTML='<p style="color:red; font-weight:bold;">CONFIGURATION ERROR: The Google Sheet URL is missing. Please paste the link into the script.</p>'))}
+    async function fetchProducts(){const grid=el("#grid");if(!GOOGLE_SHEET_URL||GOOGLE_SHEET_URL.includes("https://docs.google.com/spreadsheets/d/e/2PACX-1vQv8qPQCMfOTmke6Bzt2TlKpiGZLcFZm--VSnfSeot_YajC325p1UYkRmIp2lqF1A9Cb0uue9kPGtCP/pub?gid=0&single=true&output=csv")){return void(grid&&(grid.innerHTML='<p style="color:red; font-weight:bold;">CONFIGURATION ERROR: The Google Sheet URL is missing. Please paste the link into the script.</p>'))}
     grid&& (grid.innerHTML="<p>Loading products...</p>");try{const response=await fetch(GOOGLE_SHEET_URL);if(!response.ok)throw new Error(`Network response was not ok: ${response.statusText}`);const csvText=await response.text(),rows=csvText.split("\n").slice(1);allProducts=rows.map(row=>{const cols=row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(c=>c.replace(/"/g,""));if(cols.length<6)return null;return{id:cols[0],name:cols[1],price:parseInt(cols[2]),img:cols[3],sizes:cols[4]?cols[4].split(","):[],inStock:"TRUE"===cols[5]}}).filter(p=>p&&p.id)}catch(error){console.error("Error fetching products:",error);grid&&(grid.innerHTML="<p>Could not load products. Please check the Google Sheet link and try again later.</p>")}}
     
     function applyFilters() {
