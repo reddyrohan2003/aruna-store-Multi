@@ -8,12 +8,12 @@ import { getFirestore, collection, getDocs } from "https://www.gstatic.com/fireb
    Get this from Firebase Console -> Project settings -> Your apps (Web)
 */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_MSG_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCZpP-_TlI1dQhIWh00B4hRsZMrTPa9Qdc",
+  authDomain: "nighties-shop.firebaseapp.com",
+  projectId: "nighties-shop",
+  storageBucket: "nighties-shop.firebasestorage.app",
+  messagingSenderId: "856463502629",
+  appId: "1:856463502629:web:691b953ed6aacde41c7ecc"
 };
 /* ============================================== */
 
